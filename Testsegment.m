@@ -1,9 +1,14 @@
 clear all 
 close all
 
-%%define paths
-pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
-pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
+%%define paths PC
+%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
+%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
+
+%%define paths laptop
+pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
+pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
+
 nameimage = '1preop.nii';
 namelandm = '1preop.xml';
 s = strcat(pathimage,nameimage);
