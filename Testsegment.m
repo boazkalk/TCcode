@@ -2,12 +2,12 @@ clear all
 close all
 
 %%define paths PC
-%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
-%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
+pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
+pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
 
 %%define paths laptop
-pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
-pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
+%pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
+%pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
 
 nameimage = '1preop.nii';
 namelandm = '1preop.xml';
@@ -42,7 +42,8 @@ nii(:,:,landmark_slice) = slice_nii;
 BW = getbaseimage('vertebra1-2.png');
 lm7 = landmarks(7,:);
 lm4 = landmarks(4,:);
-for i = landmark_slice-10:-10:86
+
+for i = landmark_slice-10:-10:1
 
     slice_nii_temp = nii(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
@@ -65,38 +66,45 @@ for i = landmark_slice-10:-10:86
     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
 
     nii(:,:,i) = slice_nii_temp;
-% 
-%     lm7 = spincan;
-%     lm4 = vertbod;
+
+    lm7 = spincan;
+    lm4 = vertbod;
+
+end
+
+lm7 = landmarks(7,:);
+lm4 = landmarks(4,:);
+
+for i = landmark_slice+10:10:znii
+
+    slice_nii_temp = nii(:,:,i);
+    slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+    landmark_slice_nii = slice_nii;
+
+    filtered_nii = filterimage(slice_nii);
+
+    bin_image = makebin(filtered_nii);
+
+    %%calculate angle that initial landmarks make and pre-rotate standard image
+    %%for better initial guess
+    
+    rotation = getinitrotation(lm4, lm7);
+    
+    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+    
+    [registeredimage, vertbod, spincan] = image_registration(bin_image, BW_rot, RotatedPoint1, RotatedPoint2);
+    
+    slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
+    slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+
+    nii(:,:,i) = slice_nii_temp;
+
+    lm7 = spincan;
+    lm4 = vertbod;
 
 end
 
 volumeViewer(nii)
-%%
-
-slice_nii = nii(:,:,landmark_slice-30);
-slice_nii = uint8(255 * mat2gray(slice_nii));
-landmark_slice_nii = slice_nii;
-
-filtered_nii = filterimage(slice_nii);
-
-bin_image = makebin(filtered_nii);
-
-
-%%image registration
-%%standard image
-BW = getbaseimage('vertebra1-2.png');
-
-%%calculate angle that initial landmarks make and pre-rotate standard image
-%%for better initial guess
-lm7 = landmarks(7,:);
-lm4 = landmarks(4,:);
-rotation = getinitrotation(lm4, lm7);
-
-[BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
-
-[registeredimage, vertbod, spincan] = image_registration(bin_image, BW_rot, RotatedPoint1, RotatedPoint2);
-
 
 %%
 [Boundaries,L] = bwboundaries(bin_image,'noholes');
@@ -229,9 +237,9 @@ vertbod = round(vertbod);
 spincan = round(spincan);
 
 %%plot
-figure,imshowpair(registeredimage,fixed)
-hold on
-plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
-hold on
-plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+% figure,imshowpair(registeredimage,fixed)
+% hold on
+% plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+% hold on
+% plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
 end
