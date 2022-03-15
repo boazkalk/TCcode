@@ -35,14 +35,13 @@ end
 
 nii(:,:,landmark_slice) = slice_nii;
 
-
 %%
 [xnii,ynii,znii] = size(nii);
-BW = getbaseimage('vertebra1-2.png');
+% BW = getbaseimage('vertebra-0.png');
+% imshow(BW);
 lm7 = landmarks(7,:);
 lm4 = landmarks(4,:);
 rotation = 0;
-k=1;
 
 for i = landmark_slice-10:-10:1
 
@@ -79,18 +78,23 @@ for i = landmark_slice-10:-10:1
     rotationdiff = abs(rotationprev-rotation);
     if i == landmark_slice-10
     else 
-       if rotationdiff > 6
+       if rotationdiff > 8
             rotation = rotationprev;
        else
        end
     end
+
+    angle = 360-rotation;
+    angles = []
+
+    baseimage = im2uint8(BW);
     
     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
     
     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
 
-    figure()
-    imshowpair(bin_image_parted, BW_rot,'montage');
+%     figure()
+%     imshowpair(bin_image_parted, BW_rot,'montage');
 
 %     [registeredimage, vertbod, spincan] = image_registration(bin_image, BW_rot, RotatedPoint1, RotatedPoint2);
 
@@ -107,57 +111,139 @@ for i = landmark_slice-10:-10:1
 
 end
 
-lm7 = landmarks(7,:);
-lm4 = landmarks(4,:);
 
-for i = landmark_slice+10:10:znii
 
-    slice_nii_temp = nii(:,:,i);
-    slice_nii = uint8(255 * mat2gray(slice_nii_temp));
-    landmark_slice_nii = slice_nii;
-
-    filtered_nii = filterimage(slice_nii);
-
-    bin_image = makebin(filtered_nii);
-
-    xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
-    ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
-    if xmid < 151
-        xmin = 1;
-    else
-        xmin = xmid-150;
-    end
-    if ymid < 151
-        ymin = 1;
-    else
-        ymin = ymid-150;
-    end
-    xmax = xmid+150;
-    ymax = ymid+150;
-    
-    bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
-
-    %calculate angle that initial landmarks make and pre-rotate standard image
-    %for better initial guess
-    
-    rotation = getinitrotation(lm4, lm7);
-    
-    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
-    
-    [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
-
-    vertbod = vertbod+[ymin,xmin];
-    spincan = spincan+[ymin,xmin];
-    
-    slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
-    slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
-
-    nii(:,:,i) = slice_nii_temp;
-
-    lm7 = spincan;
-    lm4 = vertbod;
-
-end
+%%INITIAL WORKING WITH SINGLE MOVING IMAGE AND ROTATION
+% [xnii,ynii,znii] = size(nii);
+% BW = getbaseimage('vertebra0.png');
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% rotation = 0;
+%
+% for i = landmark_slice-10:-10:1
+% 
+%     slice_nii_temp = nii(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+%     
+%     xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+%     ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+%     if xmid < 151
+%         xmin = 1;
+%     else
+%         xmin = xmid-150;
+%     end
+%     if ymid < 151
+%         ymin = 1;
+%     else
+%         ymin = ymid-150;
+%     end
+%     xmax = xmid+150;
+%     ymax = ymid+150;
+%     
+%     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+% 
+%     %%calculate angle that initial landmarks make and pre-rotate standard image
+%     %%for better initial guess
+%     
+%     rotationprev = rotation;
+%     rotation = getinitrotation(lm4, lm7);
+%     rotationdiff = abs(rotationprev-rotation);
+%     if i == landmark_slice-10
+%     else 
+%        if rotationdiff > 8
+%             rotation = rotationprev;
+%        else
+%        end
+%     end
+%     
+%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+%     
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+% %     figure()
+% %     imshowpair(bin_image_parted, BW_rot,'montage');
+% 
+% %     [registeredimage, vertbod, spincan] = image_registration(bin_image, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+%     
+%     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
+%     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+% 
+%     nii(:,:,i) = slice_nii_temp;
+% 
+%     lm7 = spincan;
+%     lm4 = vertbod;
+% 
+% end
+%
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% rotation = 0;
+% 
+% for i = landmark_slice+10:10:znii
+% 
+%     slice_nii_temp = nii(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+% 
+%     xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+%     ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+%     if xmid < 151
+%         xmin = 1;
+%     else
+%         xmin = xmid-150;
+%     end
+%     if ymid < 151
+%         ymin = 1;
+%     else
+%         ymin = ymid-150;
+%     end
+%     xmax = xmid+150;
+%     ymax = ymid+150;
+%     
+%     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+% 
+%     %calculate angle that initial landmarks make and pre-rotate standard image
+%     %for better initial guess
+%     
+%     rotationprev = rotation;
+%     rotation = getinitrotation(lm4, lm7);
+%     rotationdiff = abs(rotationprev-rotation);
+%     if i == landmark_slice+10
+%     else 
+%        if rotationdiff > 8
+%             rotation = rotationprev;
+%        else
+%        end
+%     end
+%     
+%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+%     
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+%     
+%     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
+%     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+% 
+%     nii(:,:,i) = slice_nii_temp;
+% 
+%     lm7 = spincan;
+%     lm4 = vertbod;
+% 
+% end
 
 volumeViewer(nii)
 
@@ -251,10 +337,11 @@ end
 
 function baseimage = getbaseimage(name)
 I = imread(name);
-vertebra1 = I(:,:,1);
-BW = imbinarize(vertebra1);
-BW = imcomplement(BW);
-baseimage = im2uint8(BW);
+% vertebra1 = I(:,:,1);
+% BW = imbinarize(vertebra1);
+% BW = imcomplement(BW);
+% baseimage = im2uint8(BW);
+baseimage = im2uint8(I);
 end
 
 function rotation = getinitrotation(lm4, lm7)
