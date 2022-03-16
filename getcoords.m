@@ -1,7 +1,7 @@
 clear all 
 close all
 
-name = 'vertebra-135.png';
+name = 'vertebra-157.5.png';
 image = imread(name);
 
 pts = readPoints(image, 2);

@@ -2,12 +2,12 @@ clear all
 close all
 
 %%define paths PC
-%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
-%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
+pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
+pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
 
 %%define paths laptop
-pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
-pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
+%pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
+%pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
 
 nameimage = '1preop.nii';
 namelandm = '1preop.xml';
@@ -37,15 +37,15 @@ nii(:,:,landmark_slice) = slice_nii;
 
 %%
 [xnii,ynii,znii] = size(nii);
-% BW = getbaseimage('vertebra-0.png');
-% imshow(BW);
 lm7 = landmarks(7,:);
 lm4 = landmarks(4,:);
 rotation = 0;
+nii1 = nii;
+nii2 = nii;
 
 for i = landmark_slice-10:-10:1
 
-    slice_nii_temp = nii(:,:,i);
+    slice_nii_temp = nii1(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
     landmark_slice_nii = slice_nii;
 
@@ -85,18 +85,26 @@ for i = landmark_slice-10:-10:1
     end
 
     angle = 360-rotation;
-    angles = []
-
-    baseimage = im2uint8(BW);
+    angles = [0 22.5 45 67.5 90 112.5 135 157.5 180];
+    standard_points = [93, 155, 189, 198, 175, 200, 195, 157, 98;5, 41, 68, 87, 95, 153, 188, 197, 175;93, 110, 111, 93, 63, 96, 114, 115,98; ...
+        117, 143, 148, 132, 94, 110, 109, 94, 63];
+    for n = 1:1:length(angles)
+        diff(n) = abs(angles(n)-angle);
+    end
+    [~,index] = min(diff);
+    angle_approx = angles(index);
+    baseimagename = strcat('vertebra-', num2str(angle_approx), '.png');
+    baseimage = getbaseimage(baseimagename);
+    baseimage = im2uint8(baseimage);
     
-    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+    RotatedPoint1 = standard_points(1:2,index);
+    RotatedPoint2 = standard_points(3:4,index);
     
-    [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+    %rot point 1 = vert bod, rot point 2 = spin can
+    [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2);
 
 %     figure()
-%     imshowpair(bin_image_parted, BW_rot,'montage');
-
-%     [registeredimage, vertbod, spincan] = image_registration(bin_image, BW_rot, RotatedPoint1, RotatedPoint2);
+%     imshowpair(bin_image_parted, baseimage,'montage');
 
     vertbod = vertbod+[ymin,xmin];
     spincan = spincan+[ymin,xmin];
@@ -104,7 +112,7 @@ for i = landmark_slice-10:-10:1
     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
 
-    nii(:,:,i) = slice_nii_temp;
+    nii1(:,:,i) = slice_nii_temp;
 
     lm7 = spincan;
     lm4 = vertbod;
@@ -112,17 +120,16 @@ for i = landmark_slice-10:-10:1
 end
 
 
-
 %%INITIAL WORKING WITH SINGLE MOVING IMAGE AND ROTATION
 % [xnii,ynii,znii] = size(nii);
-% BW = getbaseimage('vertebra0.png');
+% BW = getbaseimage2('vertebra0-clr.png');
 % lm7 = landmarks(7,:);
 % lm4 = landmarks(4,:);
 % rotation = 0;
-%
+% 
 % for i = landmark_slice-10:-10:1
 % 
-%     slice_nii_temp = nii(:,:,i);
+%     slice_nii_temp = nii2(:,:,i);
 %     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
 %     landmark_slice_nii = slice_nii;
 % 
@@ -176,7 +183,7 @@ end
 %     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
 %     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
 % 
-%     nii(:,:,i) = slice_nii_temp;
+%     nii2(:,:,i) = slice_nii_temp;
 % 
 %     lm7 = spincan;
 %     lm4 = vertbod;
@@ -244,11 +251,12 @@ end
 %     lm4 = vertbod;
 % 
 % end
+volumeViewer(nii1)
+volumeViewer(nii2)
 
-volumeViewer(nii)
 
 %%
-[Boundaries,L] = bwboundaries(bin_image,'noholes');
+% [Boundaries,L] = bwboundaries(bin_image,'noholes');
 
 %%
 % figure()
@@ -342,6 +350,14 @@ I = imread(name);
 % BW = imcomplement(BW);
 % baseimage = im2uint8(BW);
 baseimage = im2uint8(I);
+end
+
+function baseimage = getbaseimage2(name)
+I = imread(name);
+vertebra1 = I(:,:,1);
+BW = imbinarize(vertebra1);
+BW = imcomplement(BW);
+baseimage = im2uint8(BW);
 end
 
 function rotation = getinitrotation(lm4, lm7)
