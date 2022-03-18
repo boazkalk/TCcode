@@ -6,12 +6,20 @@ tempbw = makebin(temp);
 
 imshow(tempbw);
 
-alpha = 360-157.5;
+for i = 1:5:181
+
+angle = i-1;
+
+alpha = 360-angle;
 vert_rot = imrotate(tempbw,alpha);
 
 imshow(vert_rot);
 
-imwrite(vert_rot, 'vertebra-157.5.png');
+name = strcat('vertebra-', num2str(angle), '.png');
+
+imwrite(vert_rot, name);
+
+end
 
 function image = makebin(x)
     image = x;

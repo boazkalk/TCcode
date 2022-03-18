@@ -1,12 +1,28 @@
 clear all 
 close all
 
-name = 'vertebra-157.5.png';
+angles = [0 22.5 45 67.5 90 112.5 135 157.5 180];
+standard_points = [93, 155, 189, 198, 175, 200, 195, 157, 98;5, 41, 68, 87, 95, 153, 188, 197, 175;93, 110, 111, 93, 63, 96, 114, 115,98; ...
+        117, 143, 148, 132, 94, 110, 109, 94, 63];
+
+j=1;
+Total_points = [];
+
+for i = 1:5:181
+angle = i-1;
+
+name = strcat('Register_images\vertebra-', num2str(angle), '.png');
 image = imread(name);
 
-pts = readPoints(image, 2);
+pts = readPoints(image, 2,angle);
 
-function pts = readPoints(image, n)
+Total_points(1:2,j) = pts(:,2);
+Total_points(3:4,j) = pts(:,1);
+j=j+1;
+
+end
+
+function pts = readPoints(image, n,angle)
 %readPoints   Read manually-defined points from image
 %   POINTS = READPOINTS(IMAGE) displays the image in the current figure,
 %   then records the position of each click of button 1 of the mouse in the
@@ -21,7 +37,8 @@ if nargin < 2
 else
     pts = zeros(2, n);
 end
-imshow(image);     % display image
+imshow(image);
+set(gcf, 'units','normalized','outerposition',[0 0 1 1]);% display image
 xold = 0;
 yold = 0;
 k = 0;
