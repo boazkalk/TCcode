@@ -128,8 +128,11 @@ nii1 = nii;
 lm7 = landmarks(7,:);
 lm4 = landmarks(4,:);
 rotation = 0;
+counter = 0;
+counterratio = 0;
+dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 
-for i = landmark_slice+10:5:znii
+for i = landmark_slice+10:10:znii
 
     slice_nii_temp = nii1(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
@@ -165,15 +168,12 @@ for i = landmark_slice+10:5:znii
     if i == landmark_slice+10
     else 
        if rotationdiff > 5
-            rotation = rotationprev;
+            rotation = (rotationprev+rotation)/2;
        else
        end
     end
 
     angle = 360-rotation;
-%     angles = [0 22.5 45 67.5 90 112.5 135 157.5 180];
-%     standard_points = [93, 155, 189, 198, 175, 200, 195, 157, 98;5, 41, 68, 87, 95, 153, 188, 197, 175;93, 110, 111, 93, 63, 96, 114, 115,98; ...
-%         117, 143, 148, 132, 94, 110, 109, 94, 63];
     for n = 1:1:length(angles)
         diff(n) = abs(angles(n)-angle);
     end
@@ -189,19 +189,88 @@ for i = landmark_slice+10:5:znii
     %rot point 1 = vert bod, rot point 2 = spin can
     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2);
 
-%     figure()
-%     imshowpair(bin_image_parted, baseimage,'montage');
-
     vertbod = vertbod+[ymin,xmin];
     spincan = spincan+[ymin,xmin];
+
+    dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+    dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+
+    dist_between = pdist([vertbod;spincan],'euclidean');
+    ratio_dist_between = dist_between/dist_between_end;
     
-    slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
-    slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+%     subplot(1,3,1)
+%     imshow(slice_nii_temp)
+%     hold on
+%     plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+%     hold on
+%     plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+%     title('new_guess')
+%     subplot(1,3,2)
+%     imshow(slice_nii_temp)
+%     hold on
+%     plot(lm4(1,2) , lm4(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+%     hold on
+%     plot(lm7(1,2), lm7(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+%     title('old')
+    
+%     if ratio_dist_between > 1.2 || ratio_dist_between < 0.8 
+%         counterratio=counterratio+1;
+%         if counterratio > 2
+%             coord_vertbod = vertbod;
+%             coord_spincan = spincan;
+%             lm7 = spincan;
+%             lm4 = vertbod;
+%             counter = 0;
+%             disp('taken new')
+%         else
+%         coord_vertbod = lm4;
+%         coord_spincan = lm7;
+%         lm4 = lm4(1:2);
+%         lm7 = lm7(1:2);
+%         disp('taken old')
+%         end
+%     elseif dist_vertbod > 30 || dist_spincan > 30
+%         counter=counter+1;
+%         if counter > 2
+%             coord_vertbod = vertbod;
+%             coord_spincan = spincan;
+%             lm7 = spincan;
+%             lm4 = vertbod;
+%             counter = 0;
+%             disp('taken new')
+%         else
+%         coord_vertbod = lm4;
+%         coord_spincan = lm7;
+%         lm4 = lm4(1:2);
+%         lm7 = lm7(1:2);
+%         disp('taken old')
+%         end
+%     else
+        coord_vertbod = vertbod;
+        coord_spincan = spincan;
+        lm7 = spincan;
+        lm4 = vertbod;
+%          counter = 0;
+%         counterratio = 0;
+%         disp('taken new')
+%     end
+
+    dist_between_end = pdist([coord_vertbod;coord_spincan],'euclidean');
+
+%     subplot(1,3,3)
+%     imshow(slice_nii_temp)
+%     hold on
+%     plot(coord_vertbod(1,2) , coord_vertbod(1,1),'s','MarkerEdgeColor','green','MarkerFaceColor','green')
+%     hold on
+%     plot(coord_spincan(1,2), coord_spincan(1,1),'s','MarkerEdgeColor','green','MarkerFaceColor','green')
+%     title('new')
+%     set(gcf, 'units','normalized','outerposition',[0 0 1 1]);% display image
+    
+    slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
+    slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
 
     nii1(:,:,i) = slice_nii_temp;
-
-    lm7 = spincan;
-    lm4 = vertbod;
+ 
 
 end
 
