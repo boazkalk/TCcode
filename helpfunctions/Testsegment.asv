@@ -1,0 +1,846 @@
+clear all 
+close all
+
+%%define paths PC
+%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
+%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
+
+%%define paths laptop
+pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
+pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
+
+nameimage = '1preop.nii';
+namelandm = '1preop.xml';
+s = strcat(pathimage,nameimage);
+s2 = strcat(pathlandm,namelandm);
+
+%%read in .nii and landmarks file
+nii = niftiread(s);
+landmarks_struct = xml2struct(s2);
+
+%%extract landmarks
+landmarks = getlandmarks(landmarks_struct);
+landmarks = round(landmarks);
+
+%%visualize landmarks
+landmark_slice = landmarks(1,3);
+
+slice_nii = nii(:,:,landmark_slice);
+% slice_nii = uint8(255 * mat2gray(slice_nii));
+for i = 4:3:7
+    x = landmarks(i,1);
+    y = landmarks(i,2);
+    slice_nii(x-5:x+5,y-5:y+5) = 2500;
+end
+
+nii(:,:,landmark_slice) = slice_nii;
+
+%% Import moving images information
+load('Register_images\Angles_stand.mat');
+load('Register_images\Coords_stand.mat');
+standard_points = Total_points;
+
+%%
+% [xnii,ynii,znii] = size(nii);
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% rotation = 0;
+% nii1 = nii;
+% dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
+% 
+% % for i = landmark_slice-10:-10:1
+% % 
+% %     slice_nii_temp = nii1(:,:,i);
+% %     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+% %     landmark_slice_nii = slice_nii;
+% % 
+% %     filtered_nii = filterimage(slice_nii);
+% % 
+% %     bin_image = makebin(filtered_nii);
+% %     
+% %     [bin_image_parted, xmin, ymin, xmax, ymax] = squareimage(bin_image, lm4, lm7);    
+% % 
+% %     %%calculate angle that initial landmarks make and pre-rotate standard image
+% %     %%for better initial guess
+% %     [baseimage, RotatedPoint1, RotatedPoint2, rotation] = rot_image_guess(rotation, lm4, lm7, i, angles, standard_points, landmark_slice, -10);
+% %     
+% %     %rot point 1 = vert bod, rot point 2 = spin can
+% %     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2);
+% % 
+% %     vertbod = vertbod+[ymin,xmin];
+% %     spincan = spincan+[ymin,xmin];
+% % 
+% %     dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+% %     dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% % 
+% %     dist_between = pdist([vertbod;spincan],'euclidean');
+% %     ratio_dist_between = dist_between/dist_between_end;
+% % 
+% %     
+% %     if ratio_dist_between > 1.3 || ratio_dist_between < 0.7 || dist_spincan > 25 || dist_vertbod > 25
+% %         fractions = [5 8 11 12 13 14 15 16 17 18 19 20];
+% %         counter = 1;
+% %         while counter < length(fractions+1)
+% %             [registeredimage, vertbod, spincan] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, fractions(counter));
+% %             vertbod = vertbod+[ymin,xmin];
+% %             spincan = spincan+[ymin,xmin];
+% % 
+% %             dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+% %             dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% % 
+% %             dist_between = pdist([vertbod;spincan],'euclidean');
+% %             ratio_dist_between = dist_between/dist_between_end;
+% % 
+% %             if ratio_dist_between < 1.3 && ratio_dist_between > 0.7 && dist_spincan < 25 && dist_vertbod < 25
+% %             counter = 100;
+% %             else 
+% %             counter = counter+1;
+% %             end
+% %         end
+% % 
+% %         if counter == 100
+% %             coord_vertbod = vertbod;
+% %             coord_spincan = spincan;
+% %             lm7 = spincan;
+% %             lm4 = vertbod;
+% %             disp('taken retry new')
+% %         else
+% %             coord_vertbod = lm4;
+% %             coord_spincan = lm7;
+% %             lm4 = lm4(1:2);
+% %             lm7 = lm7(1:2);
+% %             disp('taken old')
+% %         end
+% %     else
+% %         coord_vertbod = vertbod;
+% %         coord_spincan = spincan;
+% %         lm7 = spincan;
+% %         lm4 = vertbod;
+% %         disp('taken new')
+% %     end
+% % 
+% %     dist_between_end = pdist([coord_vertbod;coord_spincan],'euclidean');
+% %     
+% %     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
+% %     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
+% % 
+% %     nii1(:,:,i) = slice_nii_temp;
+% %  
+% % end
+% 
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% rotation = 0;
+% dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
+% v=1;
+% 
+% for i = landmark_slice+5:5:landmark_slice+80
+% 
+%     slice_nii_temp = nii1(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+%     
+%     [bin_image_parted, xmin, ymin, xmax, ymax] = squareimage(bin_image, lm4, lm7);    
+% 
+%     %%calculate angle that initial landmarks make and pre-rotate standard image
+%     %%for better initial guess
+%     [baseimage, RotatedPoint1, RotatedPoint2, rotation(v),angle_approx_array(v)] = rot_image_guess(rotation, lm4, lm7, i, angles, standard_points, landmark_slice, 5);
+%     
+%     %rot point 1 = vert bod, rot point 2 = spin can
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+% 
+%     dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+%     dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% 
+%     dist_between = pdist([vertbod;spincan],'euclidean');
+%     ratio_dist_between = dist_between/dist_between_end;
+% 
+%     
+%     if ratio_dist_between > 1.15 || ratio_dist_between < 0.85 || dist_spincan > 25 || dist_vertbod > 25
+%         fractions = [5 8 11 12 13 14 15 16 17 18 19 20];
+%         counter = 1;
+% 
+% %         disp(strcat('ratio ' , num2str(ratio_dist_between)));
+% %         disp(strcat('spincan ' , num2str(dist_spincan)));
+% %         disp(strcat('vertbod ' , num2str(dist_vertbod)));
+% 
+%         while counter < length(fractions+1)
+%             [registeredimage, vertbod, spincan] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, fractions(counter));
+%             vertbod = vertbod+[ymin,xmin];
+%             spincan = spincan+[ymin,xmin];
+% 
+%             dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+%             dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% 
+%             dist_between = pdist([vertbod;spincan],'euclidean');
+%             ratio_dist_between = dist_between/dist_between_end;
+% 
+% %             disp(strcat('ratio ' , num2str(ratio_dist_between)));
+% %             disp(strcat('spincan ' , num2str(dist_spincan)));
+% %             disp(strcat('vertbod ' , num2str(dist_vertbod)));
+% 
+%             if ratio_dist_between < 1.15 && ratio_dist_between > 0.85 && dist_spincan < 25 && dist_vertbod < 25
+%             disp(num2str(fractions(counter)));
+%             counter = 100;
+%             else 
+%             counter = counter+1;
+%             end
+%         end
+% 
+%         if counter == 100
+%             coord_vertbod = vertbod;
+%             coord_spincan = spincan;
+%             lm7 = spincan;
+%             lm4 = vertbod;
+%             disp('taken retry new')
+%         else
+%             coord_vertbod = lm4;
+%             coord_spincan = lm7;
+%             lm4 = lm4(1:2);
+%             lm7 = lm7(1:2);
+%             disp('taken old')
+%         end
+%     else
+%         coord_vertbod = vertbod;
+%         coord_spincan = spincan;
+%         lm7 = spincan;
+%         lm4 = vertbod;
+%         disp('taken new')
+%     end
+% 
+%     dist_between_end = pdist([coord_vertbod;coord_spincan],'euclidean');
+%     
+%     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
+%     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
+% 
+%     nii1(:,:,i) = slice_nii_temp;
+%     v = v+1;
+%  
+% end
+% 
+% figure()
+% plot(angle_approx_array);
+% volumeViewer(nii1)
+
+% % %%INITIAL WORKING WITH SINGLE MOVING IMAGE AND ROTATION
+% [xnii,ynii,znii] = size(nii);
+% BW = getbaseimage2('Register_images\vertebra0-clr.png');
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% nii2=nii;
+% rotation = 0;
+% 
+% for i = landmark_slice-10:-10:1
+% 
+%     slice_nii_temp = nii2(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+%     
+%     xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+%     ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+%     if xmid < 151
+%         xmin = 1;
+%     else
+%         xmin = xmid-150;
+%     end
+%     if ymid < 151
+%         ymin = 1;
+%     else
+%         ymin = ymid-150;
+%     end
+%     xmax = xmid+150;
+%     ymax = ymid+150;
+%     
+%     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+% 
+%     %%calculate angle that initial landmarks make and pre-rotate standard image
+%     %%for better initial guess
+%     
+%     rotationprev = rotation;
+%     rotation = getinitrotation(lm4, lm7);
+%     rotationdiff = abs(rotationprev-rotation);
+%     if i == landmark_slice-10
+%     else 
+%        if rotationdiff > 8
+%             rotation = rotationprev;
+%        else
+%        end
+%     end
+%     
+%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+%     
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+%     
+%     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
+%     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+% 
+%     nii2(:,:,i) = slice_nii_temp;
+% 
+%     lm7 = spincan;
+%     lm4 = vertbod;
+% 
+% end
+% 
+% lm7 = landmarks(7,:);
+% lm4 = landmarks(4,:);
+% rotation = 0;
+% 
+% for i = landmark_slice+10:10:znii
+% 
+%     slice_nii_temp = nii2(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+%     
+%     xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+%     ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+%     if xmid < 151
+%         xmin = 1;
+%     else
+%         xmin = xmid-150;
+%     end
+%     if ymid < 151
+%         ymin = 1;
+%     else
+%         ymin = ymid-150;
+%     end
+%     xmax = xmid+150;
+%     ymax = ymid+150;
+%     
+%     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+% 
+%     %%calculate angle that initial landmarks make and pre-rotate standard image
+%     %%for better initial guess
+%     
+%     rotationprev = rotation;
+%     rotation = getinitrotation(lm4, lm7);
+%     rotationdiff = abs(rotationprev-rotation);
+%     if i == landmark_slice+10
+%     else 
+%        if rotationdiff > 8
+%             rotation = rotationprev;
+%        else
+%        end
+%     end
+%     
+%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+%     
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+%     
+%     slice_nii_temp(vertbod(1)-5:vertbod(1)+5,vertbod(2)-5:vertbod(2)+5) = 2500;
+%     slice_nii_temp(spincan(1)-5:spincan(1)+5,spincan(2)-5:spincan(2)+5) = 2500;
+% 
+%     nii2(:,:,i) = slice_nii_temp;
+% 
+%     lm7 = spincan;
+%     lm4 = vertbod;
+% 
+% end
+
+[xnii,ynii,znii] = size(nii);
+BW = getbaseimage2('Register_images\vertebra0-clr.png');
+lm7 = landmarks(7,:);
+lm4 = landmarks(4,:);
+nii2=nii;
+rotation = 0;
+dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
+
+% for i = landmark_slice-10:-10:1
+% 
+%     slice_nii_temp = nii2(:,:,i);
+%     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+%     landmark_slice_nii = slice_nii;
+% 
+%     filtered_nii = filterimage(slice_nii);
+% 
+%     bin_image = makebin(filtered_nii);
+%     
+%     xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+%     ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+%     if xmid < 151
+%         xmin = 1;
+%     else
+%         xmin = xmid-150;
+%     end
+%     if ymid < 151
+%         ymin = 1;
+%     else
+%         ymin = ymid-150;
+%     end
+%     xmax = xmid+150;
+%     ymax = ymid+150;
+%     
+%     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+% 
+%     %%calculate angle that initial landmarks make and pre-rotate standard image
+%     %%for better initial guess
+%     
+%     rotationprev = rotation;
+%     rotation = getinitrotation(lm4, lm7);
+%     rotationdiff = abs(rotationprev-rotation);
+%     if i == landmark_slice-10
+%     else 
+%        if rotationdiff > 8
+%             rotation = rotationprev;
+%        else
+%        end
+%     end
+%     
+%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+% 
+%     baseimage = BW_rot;
+%     
+%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+% 
+%     vertbod = vertbod+[ymin,xmin];
+%     spincan = spincan+[ymin,xmin];
+% 
+%     dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+%     dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% 
+%     dist_between = pdist([vertbod;spincan],'euclidean');
+%     ratio_dist_between = dist_between/dist_between_end;
+% 
+%     
+%     if ratio_dist_between > 1.30 || ratio_dist_between < 0.7 || dist_spincan > 25 || dist_vertbod > 25
+%         fractions = [5 8 11 12 13 14 15 16 17 18 19 20];
+%         counter = 1;
+% 
+% %         disp(strcat('ratio ' , num2str(ratio_dist_between)));
+% %         disp(strcat('spincan ' , num2str(dist_spincan)));
+% %         disp(strcat('vertbod ' , num2str(dist_vertbod)));
+% 
+%         while counter < length(fractions+1)
+%             [registeredimage, vertbod, spincan] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, fractions(counter));
+%             vertbod = vertbod+[ymin,xmin];
+%             spincan = spincan+[ymin,xmin];
+% 
+%             dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+%             dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+% 
+%             dist_between = pdist([vertbod;spincan],'euclidean');
+%             ratio_dist_between = dist_between/dist_between_end;
+% 
+% %             disp(strcat('ratio ' , num2str(ratio_dist_between)));
+% %             disp(strcat('spincan ' , num2str(dist_spincan)));
+% %             disp(strcat('vertbod ' , num2str(dist_vertbod)));
+% 
+%             if ratio_dist_between < 1.30 && ratio_dist_between > 0.70 && dist_spincan < 25 && dist_vertbod < 25
+%             disp(num2str(fractions(counter)));
+%             counter = 100;
+%             else 
+%             counter = counter+1;
+%             end
+%         end
+% 
+%         if counter == 100
+%             coord_vertbod = vertbod;
+%             coord_spincan = spincan;
+%             lm7 = spincan;
+%             lm4 = vertbod;
+%             disp('taken retry new')
+%         else
+%             coord_vertbod = lm4;
+%             coord_spincan = lm7;
+%             lm4 = lm4(1:2);
+%             lm7 = lm7(1:2);
+%             disp('taken old')
+%         end
+%     else
+%         coord_vertbod = vertbod;
+%         coord_spincan = spincan;
+%         lm7 = spincan;
+%         lm4 = vertbod;
+%         disp('taken new')
+%     end
+% 
+%     dist_between_end = pdist([coord_vertbod;coord_spincan],'euclidean');
+%     
+%     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
+%     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
+% 
+%     nii2(:,:,i) = slice_nii_temp;
+%  
+% end
+
+lm7 = landmarks(7,:);
+lm4 = landmarks(4,:);
+rotation = 0;
+dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
+
+for i = landmark_slice+10:10:znii
+
+    slice_nii_temp = nii2(:,:,i);
+    slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+    landmark_slice_nii = slice_nii;
+
+    filtered_nii = filterimage(slice_nii);
+
+    bin_image = makebin(filtered_nii);
+    
+    xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+    ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+    if xmid < 151
+        xmin = 1;
+    else
+        xmin = xmid-150;
+    end
+    if ymid < 151
+        ymin = 1;
+    else
+        ymin = ymid-150;
+    end
+    xmax = xmid+150;
+    ymax = ymid+150;
+    
+    bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+
+    %%calculate angle that initial landmarks make and pre-rotate standard image
+    %%for better initial guess
+    
+    rotationprev = rotation;
+    rotation = getinitrotation(lm4, lm7);
+    rotationdiff = abs(rotationprev-rotation);
+    if i == landmark_slice+10
+    else 
+       if rotationdiff > 8
+            rotation = (rotationprev+rotation)/2;
+       else
+       end
+    end
+    
+    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+
+    baseimage = BW_rot;
+    
+    [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+
+    vertbod = vertbod+[ymin,xmin];
+    spincan = spincan+[ymin,xmin];
+
+    dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+    dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+
+    dist_between = pdist([vertbod;spincan],'euclidean');
+    ratio_dist_between = dist_between/dist_between_end;
+
+    
+    %if ratio_dist_between > 1.30 || ratio_dist_between < 0.70 || dist_spincan > 25 || dist_vertbod > 25
+    if ratio_dist_between > 1.30 || dist_spincan > 25 || dist_vertbod > 25
+        fractions = [5 8 12 14 16 18 20 3 1];
+        counter = 1;
+
+        disp(strcat('ratio ' , num2str(ratio_dist_between)));
+        disp(strcat('spincan ' , num2str(dist_spincan)));
+        disp(strcat('vertbod ' , num2str(dist_vertbod)));
+
+        while counter < length(fractions+1)
+            [registeredimage, vertbod, spincan] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, fractions(counter));
+            vertbod = vertbod+[ymin,xmin];
+            spincan = spincan+[ymin,xmin];
+
+            dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
+            dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
+
+            dist_between = pdist([vertbod;spincan],'euclidean');
+            ratio_dist_between = dist_between/dist_between_end;
+
+%             disp(strcat('ratio ' , num2str(ratio_dist_between)));
+%             disp(strcat('spincan ' , num2str(dist_spincan)));
+%             disp(strcat('vertbod ' , num2str(dist_vertbod)));
+
+            %if ratio_dist_between < 1.30 && ratio_dist_between > 0.70 && dist_spincan < 25 && dist_vertbod < 25
+            if ratio_dist_between < 1.30 && dist_spincan > 25 && dist_vertbod > 25
+            disp(num2str(fractions(counter)));
+            counter = 100;
+            else 
+            counter = counter+1;
+            end
+        end
+
+        if counter == 100
+            coord_vertbod = vertbod;
+            coord_spincan = spincan;
+            lm7 = spincan;
+            lm4 = vertbod;
+            disp('taken retry new')
+        else
+            coord_vertbod = lm4;
+            coord_spincan = lm7;
+            lm4 = lm4(1:2);
+            lm7 = lm7(1:2);
+            disp('taken old')
+        end
+    else
+        coord_vertbod = vertbod;
+        coord_spincan = spincan;
+        lm7 = spincan;
+        lm4 = vertbod;
+        disp('taken new')
+    end
+
+    dist_between_end = pdist([coord_vertbod;coord_spincan],'euclidean');
+    
+    slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
+    slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
+
+    nii2(:,:,i) = slice_nii_temp;
+ 
+end
+
+volumeViewer(nii2);
+
+
+%%
+% [Boundaries,L] = bwboundaries(bin_image,'noholes');
+
+%%
+% figure()
+% subplot(1,2,1)
+% imshow(L)
+% hold on
+% for k = 1:length(Boundaries)
+%    boundary = Boundaries{k};
+%    plot(boundary(:,2), boundary(:,1), 'b', 'LineWidth', 2)
+% end
+% hold on
+% for k = 1:length(Boundaries)
+% temp = Boundaries{k};
+% x1 = temp(:,1);
+% y1 = temp(:,2);
+% polyin = polyshape({x1},{y1});
+% [x,y] = centroid(polyin);
+% hold on
+% plot(y,x,'r*')
+% coords(k,:) = [x,y];
+% axis on
+% end
+% subplot(1,2,2)
+% imshow(slice_nii)
+
+% j = 1;
+% for i = 1:length(coords)
+%     if isnan(coords(i,1)) == 1
+%         nan(j) = i;
+%         j=j+1;
+%     else 
+%     end
+% end
+% coords(nan,:) = [];
+
+
+
+function image = makebin(x)
+    image = x;
+    for i = 1:1:height(x)
+        for j = 1:1:width(x)
+            if x(i,j) > 0
+                image(i,j) = 255;
+            else
+            end
+        end
+    end
+end
+
+function filtered_nii = filterimage(image)
+nii_filtered = [];
+for i = 1:1:height(image)
+    for j = 1:1:width(image)        
+        if image(i,j) > 125
+            nii_filtered(i,j) = image(i,j);
+        else
+            nii_filtered(i,j) = 0;
+        end
+    end
+end
+
+% figure()
+% subplot(1,3,1)
+% imshow(nii_filtered)
+% %%
+se2 = strel("disk", 2); 
+close = imclose(nii_filtered, se2);
+% subplot(1,3,2)
+% imshow(close)
+se2 = strel("disk", 2); 
+temp = imopen(close, se2);
+% subplot(1,3,3)
+% imshow(temp)
+filtered_nii = temp;
+end
+
+function landmarks = getlandmarks(x)
+j=1;
+for i = 2:2:16
+temp = x.Children(2).Children(6).Children(i).Children(4).Children.Data;
+temp = str2num(temp);
+landmarks(j,:) = temp(1,1:3);
+j=j+1;
+end
+end
+
+function baseimage = getbaseimage(name)
+I = imread(name);
+baseimage = im2uint8(I);
+end
+
+function baseimage = getbaseimage2(name)
+I = imread(name);
+vertebra1 = I(:,:,1);
+BW = imbinarize(vertebra1);
+BW = imcomplement(BW);
+baseimage = im2uint8(BW);
+end
+
+function rotation = getinitrotation(lm4, lm7)
+spincanpoint1 = lm7;
+vertpoint2 = lm4;
+vect = [(spincanpoint1(1,1)-vertpoint2(1,1)), (spincanpoint1(1,2)-vertpoint2(1,2))];
+angle1=angle(vect(1)+1i*vect(2));
+rotation = 360+angle1*180/pi;
+end
+
+function [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, alpha)
+landmarks_standard = [93,93;5,117];
+BW_rot = imrotate(BW,alpha);
+ImCenterA = (size(BW)/2)'; 
+ImCenterB = (size(BW_rot)/2)';
+P1 = landmarks_standard(:,1);
+P2 = landmarks_standard(:,2);
+RotMatrix = [cosd(-alpha) -sind(-alpha); sind(-alpha) cosd(-alpha)]; 
+RotatedPoint1 = RotMatrix*(P1-ImCenterA)+ImCenterB;
+RotatedPoint2 = RotMatrix*(P2-ImCenterA)+ImCenterB;
+end
+
+function [registeredimage, vertbod, spincan] = image_registration(fixed, moving, RotatedPoint1, RotatedPoint2)
+
+[~,metric] = imregconfig('multimodal');
+
+%% Optimizer (stand)
+optimizer = registration.optimizer.OnePlusOneEvolutionary;
+optimizer.InitialRadius = 6.25e-3/10; %smaller initial radius = less deviation from moving rotated input image
+optimizer.GrowthFactor = 1.07;
+optimizer.Epsilon = 1.5e-6;
+optimizer.MaximumIterations = 250;
+
+registeredimage = imregister(moving,fixed,'similarity',optimizer,metric);
+tform = imregtform(moving, fixed, 'similarity', optimizer, metric);
+
+%%new coordinates 
+[vertbod(1,2),vertbod(1,1)] = transformPointsForward(tform,RotatedPoint1(1),RotatedPoint1(2));
+[spincan(1,2),spincan(1,1)] = transformPointsForward(tform,RotatedPoint2(1),RotatedPoint2(2));
+
+vertbod = round(vertbod);
+spincan = round(spincan);
+
+%%plot
+figure()
+subplot(1,2,1)
+imshowpair(registeredimage,fixed)
+hold on
+plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+hold on
+plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+subplot(1,2,2)
+imshow(moving)
+end
+
+function [bin_image_parted, xmin, ymin, xmax, ymax] = squareimage(bin_image, lm4, lm7)
+    xmid = round((min(lm4(2), lm7(2))+max(lm4(2), lm7(2)))/2);
+    ymid = round((min(lm4(1), lm7(1))+max(lm4(1), lm7(1)))/2);
+    if xmid < 151
+        xmin = 1;
+    else
+        xmin = xmid-150;
+    end
+    if ymid < 151
+        ymin = 1;
+    else
+        ymin = ymid-150;
+    end
+    xmax = xmid+150;
+    ymax = ymid+150;
+    
+    bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
+end
+
+function [baseimage, RotatedPoint1, RotatedPoint2, rotation,angle_approx_array] = rot_image_guess(rotation, lm4, lm7, i, angles, standard_points, landmark_slice, plusmin)
+% rotationprev = rotation;
+rotation = getinitrotation(lm4, lm7);
+% rotationdiff = abs(rotationprev-rotation);
+% if i == landmark_slice+plusmin
+% else 
+%    if rotationdiff > 5
+%         rotation = (rotationprev+rotation)/2;
+%    else
+%    end
+% end
+
+angle = 360-rotation;
+for n = 1:1:length(angles)
+    diff(n) = abs(angles(n)-angle);
+end
+[~,index] = min(diff);
+angle_approx = angles(index);
+angle_approx_array = angle_approx;
+baseimagename = strcat('Register_images\vertebra-', num2str(angle_approx), '.png');
+baseimage = getbaseimage(baseimagename);
+baseimage = im2uint8(baseimage);
+
+RotatedPoint1 = standard_points(1:2,index);
+RotatedPoint2 = standard_points(3:4,index);
+end
+
+function [registeredimage, vertbod, spincan] = image_registration1(fixed, moving, RotatedPoint1, RotatedPoint2, fraction)
+
+[~,metric] = imregconfig('multimodal');
+
+%% Optimizer (stand)
+optimizer = registration.optimizer.OnePlusOneEvolutionary;
+optimizer.InitialRadius = 6.25e-3/fraction; %smaller initial radius = less deviation from moving rotated input image
+optimizer.GrowthFactor = 1.07;
+optimizer.Epsilon = 1.5e-6;
+optimizer.MaximumIterations = 500;
+
+registeredimage = imregister(moving,fixed,'similarity',optimizer,metric);
+tform = imregtform(moving, fixed, 'similarity', optimizer, metric);
+
+%%new coordinates 
+[vertbod(1,2),vertbod(1,1)] = transformPointsForward(tform,RotatedPoint1(1),RotatedPoint1(2));
+[spincan(1,2),spincan(1,1)] = transformPointsForward(tform,RotatedPoint2(1),RotatedPoint2(2));
+
+vertbod = round(vertbod);
+spincan = round(spincan);
+
+%plot
+% figure()
+% subplot(1,2,1)
+% imshowpair(registeredimage,fixed)
+% hold on
+% plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+% hold on
+% plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+% subplot(1,2,2)
+% imshow(moving)
+% sgtitle('retry')
+end

@@ -1,28 +1,40 @@
 clear all 
 close all
 
-angles = [0 22.5 45 67.5 90 112.5 135 157.5 180];
-standard_points = [93, 155, 189, 198, 175, 200, 195, 157, 98;5, 41, 68, 87, 95, 153, 188, 197, 175;93, 110, 111, 93, 63, 96, 114, 115,98; ...
-        117, 143, 148, 132, 94, 110, 109, 94, 63];
+%%define paths PC
+%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
+%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
 
-j=1;
-Total_points = [];
+%%define paths laptop
+pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
+pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
 
-for i = 1:5:181
-angle = i-1;
+nameimage = '1preop.nii';
+namelandm = '1preop.xml';
+s = strcat(pathimage,nameimage);
+s2 = strcat(pathlandm,namelandm);
 
-name = strcat('Register_images\vertebra-', num2str(angle), '.png');
-image = imread(name);
+%%read in .nii and landmarks file
+nii = niftiread(s);
+%imshow(nii(:,:,200))
 
-pts = readPoints(image, 2,angle);
+pts = readPoints(nii(:,:,200), 1);
 
-Total_points(1:2,j) = pts(:,2);
-Total_points(3:4,j) = pts(:,1);
-j=j+1;
+value_metal = nii(round(pts(2,1)),round(pts(1,1)),200);
+%value_bone = nii()
 
-end
+% for i = 1:1:427
+% 
+%     niislice = nii(:,:,i);
+%     niislice(niislice>2500) = 0;
+%     nii_new(:,:,i) = niislice;
+% 
+% end
 
-function pts = readPoints(image, n,angle)
+%volumeViewer(nii_new);
+% niftiwrite(nii_new,'1postop_th.nii')
+
+function pts = readPoints(image, n)
 %readPoints   Read manually-defined points from image
 %   POINTS = READPOINTS(IMAGE) displays the image in the current figure,
 %   then records the position of each click of button 1 of the mouse in the
@@ -67,3 +79,4 @@ if k < size(pts,2)
     pts = pts(:, 1:k);
 end
 end
+

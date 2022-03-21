@@ -170,7 +170,7 @@ lm5 = landmarks(5,:);
 rotation = 0;
 dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 
-for i = landmark_slice+10:10:landmark_slice+20
+for i = landmark_slice+10:10:landmark_slice+150
 
     slice_nii_temp = nii2(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
@@ -211,7 +211,8 @@ for i = landmark_slice+10:10:landmark_slice+20
        end
     end
     
-    [BW_rot, RotatedPoint1,RotatedPoint2,RotatedPoint3] = rotate_image(BW, rotation);
+    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
+
     baseimage = BW_rot;
     
     [registeredimage, vertbod, spincan, sidevert] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2, RotatedPoint3);
@@ -279,7 +280,7 @@ for i = landmark_slice+10:10:landmark_slice+20
             disp('taken old')
         end
     else
-        coord_vertbod = vertbod;
+        ccoord_vertbod = vertbod;
         coord_spincan = spincan;
         coord_sidevert = sidevert;
         lm7 = spincan;
@@ -292,13 +293,13 @@ for i = landmark_slice+10:10:landmark_slice+20
     
     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
-    slice_nii_temp(coord_sidevert(1)-5:coord_sidevert(1)+5,coord_sidevert(2)-5:coord_sidevert(2)+5) = 2500;
+    slice_nii_temp(coord_sidevert(1)-5:coord_sidevert(1)+5,coord_sidevertn(2)-5:coord_sidevert(2)+5) = 2500;
 
     nii2(:,:,i) = slice_nii_temp;
  
 end
 
-%volumeViewer(nii2);
+volumeViewer(nii2);
 
 
 
