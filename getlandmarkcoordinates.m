@@ -1,31 +1,7 @@
-clear all 
-close all
-
-%%define paths PC
-%pathimage = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Scoliose\';
-%pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Landmarks\';
-
-%%define paths laptop
-pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
-pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
-
-nameimage = '3preop.nii';
-namelandm = '3preop.xml';
-s = strcat(pathimage,nameimage);
-s2 = strcat(pathlandm,namelandm);
-
-%%read in .nii and landmarks file
-nii = niftiread(s);
-landmarks_struct = xml2struct(s2);
-
-%%extract landmarks
-landmarks = getlandmarks(landmarks_struct);
-landmarks = round(landmarks);
-
-%%visualize landmarks
-landmark_slice = landmarks(1,3);
+function [nii2, Vertebra_body_points, Spinal_canal_points, Side_Vertebra_body_points] = getlandmarkcoordinates(nii, landmark_slice, landmarks, slice_interval)
 
 slice_nii = nii(:,:,landmark_slice);
+slicecount = 1;
 % slice_nii = uint8(255 * mat2gray(slice_nii));
 nrs = [4 5 7];
 for i = 1:1:length(nrs)
@@ -34,6 +10,10 @@ for i = 1:1:length(nrs)
     y = landmarks(tempnr,2);
     slice_nii(x-5:x+5,y-5:y+5) = 2500;
 end
+
+Vertebra_body_points(slicecount, :) = [landmark_slice, landmarks(4,1:2)];
+Spinal_canal_points(slicecount, :) = [landmark_slice, landmarks(7,1:2)];
+Side_Vertebra_body_points(slicecount, :) = [landmark_slice, landmarks(5,1:2)];
 
 nii(:,:,landmark_slice) = slice_nii;
 
@@ -46,10 +26,11 @@ nii2=nii;
 rotation = 0;
 dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 
-% for i = landmark_slice-10:-10:1
+% for i = landmark_slice-slice_interval:-slice_interval:1
 % 
 %     slice_nii_temp = nii2(:,:,i);
 %     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+% 
 %     landmark_slice_nii = slice_nii;
 % 
 %     filtered_nii = filterimage(slice_nii);
@@ -73,28 +54,28 @@ dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 %     
 %     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
 % 
-%     %%calculate angle that initial landmarks make and pre-rotate standard image
-%     %%for better initial guess
+%     %calculate angle that initial landmarks make and pre-rotate standard image
+%     %for better initial guess
 %     
 %     rotationprev = rotation;
 %     rotation = getinitrotation(lm4, lm7);
 %     rotationdiff = abs(rotationprev-rotation);
-%     if i == landmark_slice-10
+%     if i == landmark_slice-slice_interval
 %     else 
 %        if rotationdiff > 8
-%             rotation = rotationprev;
+%             rotation = (rotationprev+rotation)/2;
 %        else
 %        end
 %     end
 %     
-%     [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
-% 
+%     [BW_rot, RotatedPoint1,RotatedPoint2,RotatedPoint3] = rotate_image(BW, rotation);
 %     baseimage = BW_rot;
 %     
-%     [registeredimage, vertbod, spincan] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2);
+%     [registeredimage, vertbod, spincan, sidevert] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2, RotatedPoint3);
 % 
 %     vertbod = vertbod+[ymin,xmin];
 %     spincan = spincan+[ymin,xmin];
+%     sidevert = sidevert+[ymin,xmin];
 % 
 %     dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
 %     dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
@@ -103,18 +84,20 @@ dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 %     ratio_dist_between = dist_between/dist_between_end;
 % 
 %     
-%     if ratio_dist_between > 1.30 || ratio_dist_between < 0.7 || dist_spincan > 25 || dist_vertbod > 25
-%         fractions = [5 8 11 12 13 14 15 16 17 18 19 20];
+%     if ratio_dist_between > 1.30 || ratio_dist_between < 0.70 || dist_spincan > 25 || dist_vertbod > 25
+%     if ratio_dist_between > 1.20 || dist_spincan > 20 || dist_vertbod > 20
+%         fractions = [5 8 12 15 17 20 1];
 %         counter = 1;
 % 
-% %         disp(strcat('ratio ' , num2str(ratio_dist_between)));
-% %         disp(strcat('spincan ' , num2str(dist_spincan)));
-% %         disp(strcat('vertbod ' , num2str(dist_vertbod)));
+%         disp(strcat('ratio ' , num2str(ratio_dist_between)));
+%         disp(strcat('spincan ' , num2str(dist_spincan)));
+%         disp(strcat('vertbod ' , num2str(dist_vertbod)));
 % 
 %         while counter < length(fractions+1)
-%             [registeredimage, vertbod, spincan] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, fractions(counter));
+%             [registeredimage, vertbod, spincan, sidevert] = image_registration1(bin_image_parted, baseimage, RotatedPoint1, RotatedPoint2, RotatedPoint3, fractions(counter));
 %             vertbod = vertbod+[ymin,xmin];
 %             spincan = spincan+[ymin,xmin];
+%             sidevert = sidevert+[ymin,xmin];
 % 
 %             dist_vertbod = pdist([vertbod;lm4(1:2)],'euclidean');
 %             dist_spincan = pdist([spincan;lm7(1:2)],'euclidean');
@@ -122,11 +105,12 @@ dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 %             dist_between = pdist([vertbod;spincan],'euclidean');
 %             ratio_dist_between = dist_between/dist_between_end;
 % 
-% %             disp(strcat('ratio ' , num2str(ratio_dist_between)));
-% %             disp(strcat('spincan ' , num2str(dist_spincan)));
-% %             disp(strcat('vertbod ' , num2str(dist_vertbod)));
+%             disp(strcat('ratio ' , num2str(ratio_dist_between)));
+%             disp(strcat('spincan ' , num2str(dist_spincan)));
+%             disp(strcat('vertbod ' , num2str(dist_vertbod)));
 % 
 %             if ratio_dist_between < 1.30 && ratio_dist_between > 0.70 && dist_spincan < 25 && dist_vertbod < 25
+%             if  ratio_dist_between < 1.20 && dist_spincan < 20 && dist_vertbod < 20
 %             disp(num2str(fractions(counter)));
 %             counter = 100;
 %             else 
@@ -137,21 +121,39 @@ dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 %         if counter == 100
 %             coord_vertbod = vertbod;
 %             coord_spincan = spincan;
+%             coord_sidevert = sidevert;
 %             lm7 = spincan;
 %             lm4 = vertbod;
-%             disp('taken retry new')
+%             lm5 = sidevert;
+%            disp('taken retry new')
 %         else
+%             pts = readPoints(slice_nii, 3);
+%             vertbod_temp = round(flip(transpose(pts(:,2))));
+%             spincan_temp = round(flip(transpose(pts(:,1))));
+%             sidevert_temp = round(flip(transpose(pts(:,3))));
+%             coord_vertbod = vertbod_temp;
+%             coord_spincan = spincan_temp;
+%             coord_sidevert = sidevert_temp;
+%             lm4 = vertbod_temp;
+%             lm7 = spincan_temp;
+%             lm5 = sidevert_temp;
+% 
+% 
 %             coord_vertbod = lm4;
 %             coord_spincan = lm7;
+%             coord_sidevert = lm5;
 %             lm4 = lm4(1:2);
 %             lm7 = lm7(1:2);
+%             lm5 = lm5(1:2);
 %             disp('taken old')
 %         end
 %     else
 %         coord_vertbod = vertbod;
 %         coord_spincan = spincan;
+%         coord_sidevert = sidevert;
 %         lm7 = spincan;
 %         lm4 = vertbod;
+%         lm5 = sidevert;
 %         disp('taken new')
 %     end
 % 
@@ -159,9 +161,14 @@ dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
 %     
 %     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
 %     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
+%     slice_nii_temp(coord_sidevert(1)-5:coord_sidevert(1)+5,coord_sidevert(2)-5:coord_sidevert(2)+5) = 2500;
 % 
 %     nii2(:,:,i) = slice_nii_temp;
 %  
+%     slicecount = slicecount+1;    
+%     Vertebra_body_points(slicecount, :) = [i, coord_vertbod];
+%     Spinal_canal_points(slicecount, :) = [i, coord_spincan];
+%     Side_Vertebra_body_points(slicecount, :) = [i, coord_sidevert];
 % end
 
 lm7 = landmarks(7,:);
@@ -169,11 +176,13 @@ lm4 = landmarks(4,:);
 lm5 = landmarks(5,:);
 rotation = 0;
 dist_between_end = pdist([lm7(1:2);lm4(1:2)],'euclidean');
+for i = landmark_slice+slice_interval:slice_interval:znii*0.7
 
-for i = landmark_slice+10:10:landmark_slice+150
+    disp(num2str(i));
 
     slice_nii_temp = nii2(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
+
     landmark_slice_nii = slice_nii;
 
     filtered_nii = filterimage(slice_nii);
@@ -203,7 +212,7 @@ for i = landmark_slice+10:10:landmark_slice+150
     rotationprev = rotation;
     rotation = getinitrotation(lm4, lm7);
     rotationdiff = abs(rotationprev-rotation);
-    if i == landmark_slice+10
+    if i == landmark_slice+slice_interval
     else 
        if rotationdiff > 8
             rotation = (rotationprev+rotation)/2;
@@ -211,8 +220,7 @@ for i = landmark_slice+10:10:landmark_slice+150
        end
     end
     
-    [BW_rot, RotatedPoint1,RotatedPoint2] = rotate_image(BW, rotation);
-
+    [BW_rot, RotatedPoint1,RotatedPoint2,RotatedPoint3] = rotate_image(BW, rotation);
     baseimage = BW_rot;
     
     [registeredimage, vertbod, spincan, sidevert] = image_registration(bin_image_parted, BW_rot, RotatedPoint1, RotatedPoint2, RotatedPoint3);
@@ -229,8 +237,8 @@ for i = landmark_slice+10:10:landmark_slice+150
 
     
     %if ratio_dist_between > 1.30 || ratio_dist_between < 0.70 || dist_spincan > 25 || dist_vertbod > 25
-    if ratio_dist_between > 1.30 || dist_spincan > 25 || dist_vertbod > 25
-        fractions = [5 8 12 14 16 18 20 3 1];
+    if ratio_dist_between > 1.20 || dist_spincan > 20 || dist_vertbod > 20
+        fractions = [5 8 12 15 17 20 1];
         counter = 1;
 
 %         disp(strcat('ratio ' , num2str(ratio_dist_between)));
@@ -254,8 +262,8 @@ for i = landmark_slice+10:10:landmark_slice+150
 %             disp(strcat('vertbod ' , num2str(dist_vertbod)));
 
             %if ratio_dist_between < 1.30 && ratio_dist_between > 0.70 && dist_spincan < 25 && dist_vertbod < 25
-            if  ratio_dist_between < 1.30 && dist_spincan < 25 && dist_vertbod < 25
-            disp(num2str(fractions(counter)));
+            if  ratio_dist_between < 1.20 && dist_spincan < 20 && dist_vertbod < 20
+            %disp(num2str(fractions(counter)));
             counter = 100;
             else 
             counter = counter+1;
@@ -271,16 +279,28 @@ for i = landmark_slice+10:10:landmark_slice+150
             lm5 = sidevert;
             disp('taken retry new')
         else
-            coord_vertbod = lm4;
-            coord_spincan = lm7;
-            coord_sidevert = lm5;
-            lm4 = lm4(1:2);
-            lm7 = lm7(1:2);
-            lm5 = lm5(1:2);
-            disp('taken old')
+            pts = readPoints(slice_nii, 3);
+            vertbod_temp = round(flip(transpose(pts(:,2))));
+            spincan_temp = round(flip(transpose(pts(:,1))));
+            sidevert_temp = round(flip(transpose(pts(:,3))));
+            coord_vertbod = vertbod_temp;
+            coord_spincan = spincan_temp;
+            coord_sidevert = sidevert_temp;
+            lm4 = vertbod_temp;
+            lm7 = spincan_temp;
+            lm5 = sidevert_temp;
+
+
+%             coord_vertbod = lm4;
+%             coord_spincan = lm7;
+%             coord_sidevert = lm5;
+%             lm4 = lm4(1:2);
+%             lm7 = lm7(1:2);
+%             lm5 = lm5(1:2);
+%             disp('taken old')
         end
     else
-        ccoord_vertbod = vertbod;
+        coord_vertbod = vertbod;
         coord_spincan = spincan;
         coord_sidevert = sidevert;
         lm7 = spincan;
@@ -293,30 +313,26 @@ for i = landmark_slice+10:10:landmark_slice+150
     
     slice_nii_temp(coord_vertbod(1)-5:coord_vertbod(1)+5,coord_vertbod(2)-5:coord_vertbod(2)+5) = 2500;
     slice_nii_temp(coord_spincan(1)-5:coord_spincan(1)+5,coord_spincan(2)-5:coord_spincan(2)+5) = 2500;
-    slice_nii_temp(coord_sidevert(1)-5:coord_sidevert(1)+5,coord_sidevertn(2)-5:coord_sidevert(2)+5) = 2500;
+    slice_nii_temp(coord_sidevert(1)-5:coord_sidevert(1)+5,coord_sidevert(2)-5:coord_sidevert(2)+5) = 2500;
 
     nii2(:,:,i) = slice_nii_temp;
+% 
+%     figure()
+%     imshow(slice_nii_temp);
  
+    slicecount = slicecount+1;    
+    Vertebra_body_points(slicecount, :) = [i, coord_vertbod];
+    Spinal_canal_points(slicecount, :) = [i, coord_spincan];
+    Side_Vertebra_body_points(slicecount, :) = [i, coord_sidevert];
+
+   
 end
 
-volumeViewer(nii2);
+% [~,idx] = sort(Vertebra_body_points(:,1));
+% Vertebra_body_points = Vertebra_body_points(idx,:);
+% [~,idx] = sort(Spinal_canal_points(:,1));
+% Spinal_canal_points = Spinal_canal_points(idx,:);
+% [~,idx] = sort(Side_Vertebra_body_points(:,1));
+% Side_Vertebra_body_points = Side_Vertebra_body_points(idx,:);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+end

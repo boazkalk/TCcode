@@ -22,14 +22,14 @@ spincan = round(spincan);
 sidevert = round(sidevert);
 
 %plot
-% figure()
-% subplot(1,2,1)
-% imshowpair(registeredimage,fixed)
-% hold on
-% plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
-% hold on
-% plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
-% subplot(1,2,2)
-% imshow(moving)
-% sgtitle('retry')
+figure()
+subplot(1,2,1)
+imshowpair(registeredimage,fixed)
+hold on
+plot(vertbod(1,2) , vertbod(1,1),'s','MarkerEdgeColor','red','MarkerFaceColor','red')
+hold on
+plot(spincan(1,2), spincan(1,1),'s','MarkerEdgeColor','blue','MarkerFaceColor','blue')
+subplot(1,2,2)
+imshow(moving)
+sgtitle('retry')
 end

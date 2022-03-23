@@ -9,8 +9,8 @@ pathlandm = 'C:\Users\boazk\Desktop\team challenge\Algo\Team challenge 2021\Land
 % pathimage = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Scoliose\';
 % pathlandm = 'C:\School\Master\Jaar 2\Q3\TC\Team challenge 2021\Landmarks\';
 
-nameimage = '3preop.nii';
-namelandm = '3preop.xml';
+nameimage = '1preop.nii';
+namelandm = '1preop.xml';
 s = strcat(pathimage,nameimage);
 s2 = strcat(pathlandm,namelandm);
 
@@ -28,7 +28,8 @@ slice_interval = 10;
 
 [nii2, Vertebra_body_points, Spinal_canal_points, Side_Vertebra_body_points] = getlandmarkcoordinates(nii, landmark_slice, landmarks, slice_interval);
 
-
+%%
+volumeViewer(nii2);
 
 
 
