@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<MeVis-XML-Data-v1.0>
+
+  <XMarkerList BaseType="XMarkerList" Version="1">
+    <_ListBase Version="0">
+      <hasPersistance>1</hasPersistance>
+      <currentIndex>7</currentIndex>
+    </_ListBase>
+    <ListSize>8</ListSize>
+    <ListItems>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>1</id>
+        </_BaseItem>
+        <pos>58.1693548387097 179.446950604839 152.5 0 0 0</pos>
+        <type>1</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>2</id>
+        </_BaseItem>
+        <pos>286.456590221774 342.430884576613 152.5 0 0 0</pos>
+        <type>2</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>3</id>
+        </_BaseItem>
+        <pos>499.927135836694 214.019279233871 152.5 0 0 0</pos>
+        <type>3</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>4</id>
+        </_BaseItem>
+        <pos>235.969978578629 221.153257308468 152.5 0 0 0</pos>
+        <type>4</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>5</id>
+        </_BaseItem>
+        <pos>246.945344002016 221.702022429435 152.5 0 0 0</pos>
+        <type>5</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>6</id>
+        </_BaseItem>
+        <pos>133.899240801411 82.8638797883064 152.5 0 0 0</pos>
+        <type>6</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>7</id>
+        </_BaseItem>
+        <pos>255.176852318548 134.996786794355 152.5 0 0 0</pos>
+        <type>7</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>8</id>
+        </_BaseItem>
+        <pos>406.087890625 115.789913054435 152.5 0 0 0</pos>
+        <type>8</type>
+      </Item>
+    </ListItems>
+  </XMarkerList>
+
+</MeVis-XML-Data-v1.0>

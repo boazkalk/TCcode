@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<MeVis-XML-Data-v1.0>
+
+  <XMarkerList BaseType="XMarkerList" Version="1">
+    <_ListBase Version="0">
+      <hasPersistance>1</hasPersistance>
+      <currentIndex>7</currentIndex>
+    </_ListBase>
+    <ListSize>8</ListSize>
+    <ListItems>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>1</id>
+        </_BaseItem>
+        <pos>18.6580928679436 184.385868195565 200.5 0 0 0</pos>
+        <type>1</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>2</id>
+        </_BaseItem>
+        <pos>273.286164314516 374.259387600806 200.5 0 0 0</pos>
+        <type>2</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>3</id>
+        </_BaseItem>
+        <pos>499.378370715726 257.371912802419 200.5 0 0 0</pos>
+        <type>3</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>4</id>
+        </_BaseItem>
+        <pos>206.885316910282 249.140404485887 200.5 0 0 0</pos>
+        <type>4</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>5</id>
+        </_BaseItem>
+        <pos>217.311885710685 250.237950478831 200.5 0 0 0</pos>
+        <type>5</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>6</id>
+        </_BaseItem>
+        <pos>91.6441532258065 102.619518649194 200.5 0 0 0</pos>
+        <type>6</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>7</id>
+        </_BaseItem>
+        <pos>227.189705141129 165.727759576613 200.5 0 0 0</pos>
+        <type>7</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>8</id>
+        </_BaseItem>
+        <pos>385.234753024194 155.849955897177 200.5 0 0 0</pos>
+        <type>8</type>
+      </Item>
+    </ListItems>
+  </XMarkerList>
+
+</MeVis-XML-Data-v1.0>

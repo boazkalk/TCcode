@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<MeVis-XML-Data-v1.0>
+
+  <XMarkerList BaseType="XMarkerList" Version="1">
+    <_ListBase Version="0">
+      <hasPersistance>1</hasPersistance>
+      <currentIndex>7</currentIndex>
+    </_ListBase>
+    <ListSize>8</ListSize>
+    <ListItems>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>1</id>
+        </_BaseItem>
+        <pos>63.6570233850671 200.848888422819 192.5002034588 0 0 0</pos>
+        <type>1</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>2</id>
+        </_BaseItem>
+        <pos>279.87135591443 334.748112416107 192.5002034588 0 0 0</pos>
+        <type>2</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>3</id>
+        </_BaseItem>
+        <pos>465.35476090604 281.517696098993 192.5002034588 0 0 0</pos>
+        <type>3</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>4</id>
+        </_BaseItem>
+        <pos>216.214358745805 232.677406669463 192.5002034588 0 0 0</pos>
+        <type>4</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>5</id>
+        </_BaseItem>
+        <pos>228.836016149329 234.872457005034 192.5002034588 0 0 0</pos>
+        <type>5</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>6</id>
+        </_BaseItem>
+        <pos>130.606648489933 126.216495385906 192.5002034588 0 0 0</pos>
+        <type>6</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>7</id>
+        </_BaseItem>
+        <pos>242.006423028523 159.691327600671 192.5002034588 0 0 0</pos>
+        <type>7</type>
+      </Item>
+      <Item Version="0">
+        <_BaseItem Version="0">
+          <id>8</id>
+        </_BaseItem>
+        <pos>358.345113255034 181.093251887584 192.5002034588 0 0 0</pos>
+        <type>8</type>
+      </Item>
+    </ListItems>
+  </XMarkerList>
+
+</MeVis-XML-Data-v1.0>
