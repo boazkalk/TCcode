@@ -1,4 +1,5 @@
-function landmark_list =  sternum_function(landmarks,image, landmark_slice, slice_interval)
+function landmark_list = sternum_function(landmarks,image,landmark_slice,slice_interval)
+
 
 lm2 = landmarks(2,:);
 slice_nii = image(:,:,landmark_slice);
@@ -27,26 +28,21 @@ lower_slice_index = round(size_sn(2)*0.33);
 lower_slice = sn(lower_slice_index);
 
 %%
-
+black = zeros(151,151,'uint8');
 landmark_list = [];
 %for the lower slices we use the same lm as the given one
-for i= lower_slice-slice_interval:-slice_interval:1
-    %disp(i)
-    %addto lm list
-    landmark_list = [i,landmarks(2,1),landmarks(2,2);landmark_list];
-end
-%%disp(landmark_list)
+
 %for the middle slices we use the sternum in the image
 landmark_list1 = [];
 for i = middle_slice:-slice_interval:lower_slice
-    %%disp(i)
+    %disp(i)
     slice_nii_temp = image(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
-    filtered_nii = filterimage(slice_nii);
-    %figure();
+    filtered_nii = filterimage_sternum(slice_nii);
+    figure();
     %imshow(filtered_nii)
-    bin_image = makebin(filtered_nii);
-   
+    bin_image = makebin_sternum(filtered_nii);
+
     xmid = lm2(2);
     ymid = lm2(1);
     if xmid < 76
@@ -71,9 +67,15 @@ for i = middle_slice:-slice_interval:lower_slice
     end 
     
     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
-    sternum= get_sternum_landmark(bin_image_parted);
+    %disp('size')
+    %disp(size(bin_image_parted))
 
-    sternum = sternum+[ymin,xmin];
+    if bin_image_parted == black
+        sternum = lm2;
+    else
+        sternum = get_sternum_landmark(bin_image_parted);
+        sternum = sternum+[ymin,xmin];
+    end
     x = sternum(1);
     y = sternum(2);
 
@@ -84,13 +86,22 @@ end
 %disp(landmark_list1)
 landmark_list = [landmark_list;landmark_list1];
 
+
+
+%for the lower slices we use the last lm
+for i= lower_slice-slice_interval:-slice_interval:1
+    %disp(i)
+    %addto lm list
+    landmark_list = [i,x,y;landmark_list];
+end
+
 landmark_list2 = [];
 for i = middle_slice+slice_interval:slice_interval:upper_slice
     %disp(i)
     slice_nii_temp = image(:,:,i);
     slice_nii = uint8(255 * mat2gray(slice_nii_temp));
-    filtered_nii = filterimage(slice_nii);
-    bin_image = makebin(filtered_nii);
+    filtered_nii = filterimage_sternum(slice_nii);
+    bin_image = makebin_sternum(filtered_nii);
    
     xmid = lm2(2);
     ymid = lm2(1);
@@ -116,16 +127,19 @@ for i = middle_slice+slice_interval:slice_interval:upper_slice
     end 
     
     bin_image_parted = bin_image(ymin:ymax,xmin:xmax);
-    sternum= get_sternum_landmark(bin_image_parted);
-
-    sternum = sternum+[ymin,xmin];
+    if bin_image_parted == black
+        sternum = [x,y];
+    else    
+        sternum= get_sternum_landmark(bin_image_parted);
+        sternum = sternum+[ymin,xmin];
+    end
     x = sternum(1);
     y = sternum(2);
 
     landmark_list2 = [landmark_list2;i,x,y];
     lm2 = sternum;
 end
-%disp(landmark_list2)
+%%disp(landmark_list2)
 landmark_list = [landmark_list;landmark_list2];
 
 ax = landmark_list(upper_slice_index,2)- landmark_list(lower_slice_index,2);
@@ -140,6 +154,7 @@ for i= upper_slice+slice_interval:slice_interval:znii
     landmark_list = [landmark_list;i,lm2(1),lm2(2)];
 end
 
-
+%disp('lm list')
+%disp(landmark_list)
 
 end

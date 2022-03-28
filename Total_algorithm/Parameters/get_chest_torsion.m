@@ -6,14 +6,15 @@ function chest_tors = get_chest_torsion(landmarks)
     x2 = landmarks(2, 1);
     y2 = landmarks(2, 2);
 
-    %%slope of lines
-    m1 = (y4-y7)/(x4-x7);
-    m2 = (y2-y7)/(x2 - x7);
+    %% vector 
+    vector1x = x4 - x7;
+    vector1y = y4 - y7;
+    vector2x = x2 - x7;
+    vector2y = y2 - y7;
 
-    %%intercept of lines
-    n1 = y7 - m1 * x7;
-    n2 = y7 - m2 * x7;
+    u = [vector1x, vector1y];
+    v = [vector2x, vector2y];
 
-    %%angle between lines
-    chest_tors = atand(m1-m2)/(1+m1*m2);
+    CosTheta = max(min(dot(u,v)/(norm(u)*norm(v)),1),-1);
+    chest_tors = real(acosd(CosTheta));
 end

@@ -3,8 +3,8 @@ function ehr = get_EHr(landmarks)
     y6 = landmarks(6, 2);
     x8 = landmarks(8, 1);
     y8 = landmarks(8, 2);
-    x5 = landmarks(4, 1);
-    y5 = landmarks(4, 2);
+    x5 = landmarks(5, 1);
+    y5 = landmarks(5, 2);
     x2 = landmarks(2, 1);
     y2 = landmarks(2, 2);
     
@@ -27,8 +27,8 @@ function ehr = get_EHr(landmarks)
     p3_x = (n3-n_perp1)/(m_perp-m);
     p3_y = m_perp*p3_x + n_perp1;
 
-    d1 = sqrt((p2_y^2 - p3_y^2) + (p2_x^2 - p3_x^2));
-    d2 = sqrt((p1_y^2 - p2_y^2) + (p1_x^2 - p2_x^2));
+    d1 = sqrt((p2_y - p3_y)^2 + (p2_x - p3_x)^2);
+    d2 = sqrt((p1_y - p2_y)^2 + (p1_x - p2_x)^2);
 
     ehr = d1/d2;    
 end
